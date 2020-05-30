@@ -138,4 +138,11 @@ impl Simulation {
             self.update_spin();
         }
     }
+
+    pub fn magnetization(&self) -> f64 {
+        let num_spin_up = self.spins.count_ones(..) as f64;
+        let num_spins = (self.width * self.height) as f64;
+
+        (2.0 * num_spin_up) / num_spins - 1.0
+    }
 }

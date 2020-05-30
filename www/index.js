@@ -113,6 +113,10 @@ function renderLoop(timestamp) {
 
     if (elapsed_time >= FRAME_TIME) {
         simulation.update_spins();
+
+        // Render new magnetisation.
+        document.getElementById("output-magnetization").textContent = simulation.magnetization().toFixed(6);
+
         last_frame_update = timestamp;
     }
 
