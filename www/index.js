@@ -45,8 +45,8 @@ startStopButton.addEventListener("click", event => {
  */
 
 const plot = document.getElementById("simulation-canvas");
-plot.width = PLOT_WIDTH;
-plot.height = PLOT_HEIGHT;
+plot.width = PLOT_WIDTH * SPIN_WIDTH;
+plot.height = PLOT_HEIGHT * SPIN_HEIGHT;
 
 const context = plot.getContext("2d");
 //context.fillStyle = "#000000";
@@ -55,7 +55,7 @@ const context = plot.getContext("2d");
 const simulation = Simulation.new(SIMULATION_WIDTH, SIMULATION_HEIGHT);
 
 function getIndex(row, column) {
-    return row * PLOT_WIDTH + column;
+    return row * plot.width + column;
 }
 
 function isSpinUp(index, array) {
@@ -66,12 +66,12 @@ function isSpinUp(index, array) {
 
 function drawSpins() {
     const spinsPtr = simulation.spins();
-    const spins = new Uint8Array(memory.buffer, spinsPtr, PLOT_WIDTH * PLOT_HEIGHT / 8);
+    const spins = new Uint8Array(memory.buffer, spinsPtr, plot.width * plot.height / 8);
 
     context.beginPath();
 
-    for (let row = 0; row < PLOT_HEIGHT; row++) {
-        for (let col = 0; col < PLOT_WIDTH; col++) {
+    for (let row = 0; row < plot.height; row++) {
+        for (let col = 0; col < plot.width; col++) {
             const index = getIndex(row, col);
 
             context.fillStyle = isSpinUp(index, spins) ? 
