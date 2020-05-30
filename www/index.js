@@ -1,4 +1,5 @@
-import * as wasm from "ising-model-2d";
+import { Simulation } from "ising-model-2d";
+import { memory } from "ising-model-2d/ising_model_2d_bg";
 
 /*
  * Constants
@@ -13,6 +14,9 @@ const PLOT_HEIGHT = 200;
 const SPIN_WIDTH = 2; // px
 const SPIN_HEIGHT = 2; // px
 
+const SPIN_UP_COLOR = "#FF0000";
+const SPIN_DOWN_COLOR = "#0000FF";
+
 /*
  * Initialize Control Panel
  */
@@ -23,17 +27,9 @@ document.getElementById("simulation-height").value = SIMULATION_HEIGHT;
 document.getElementById("plot-width").value = PLOT_WIDTH;
 document.getElementById("plot-height").value = PLOT_HEIGHT;
 
-const startStopButton = document.getElementById("start-stop-button");
-
-const canvas = document.getElementById("simulation-canvas");
-canvas.width = PLOT_WIDTH;
-canvas.height = PLOT_HEIGHT;
-
-const context = canvas.getContext("2d");
-context.fillStyle = "#000000";
-context.fillRect(0, 0, PLOT_WIDTH, PLOT_HEIGHT);
-
 let running = false;
+
+const startStopButton = document.getElementById("start-stop-button");
 
 startStopButton.addEventListener("click", event => {
     if (running) {
@@ -43,3 +39,54 @@ startStopButton.addEventListener("click", event => {
     }
     running = !running;
 });
+
+/*
+ * Draw Plot
+ */
+
+const plot = document.getElementById("simulation-canvas");
+plot.width = PLOT_WIDTH;
+plot.height = PLOT_HEIGHT;
+
+const context = plot.getContext("2d");
+//context.fillStyle = "#000000";
+//context.fillRect(0, 0, PLOT_WIDTH, PLOT_HEIGHT);
+
+const simulation = Simulation.new(SIMULATION_WIDTH, SIMULATION_HEIGHT);
+
+function getIndex(row, column) {
+    return row * PLOT_WIDTH + column;
+}
+
+function isSpinUp(index, array) {
+    let byte = Math.floor(index / 8);
+    let mask = 1 << (index % 8);
+    return (array[byte] & mask) === mask;
+}
+
+function drawSpins() {
+    const spinsPtr = simulation.spins();
+    const spins = new Uint8Array(memory.buffer, spinsPtr, PLOT_WIDTH * PLOT_HEIGHT / 8);
+
+    context.beginPath();
+
+    for (let row = 0; row < PLOT_HEIGHT; row++) {
+        for (let col = 0; col < PLOT_WIDTH; col++) {
+            const index = getIndex(row, col);
+
+            context.fillStyle = isSpinUp(index, spins) ? 
+                SPIN_UP_COLOR : SPIN_DOWN_COLOR;
+
+            context.fillRect(
+                col * (SPIN_HEIGHT+ 1) + 1,
+                row * (SPIN_WIDTH + 1) + 1,
+                SPIN_HEIGHT + 1,
+                SPIN_WIDTH + 1 
+            );
+        }
+    }
+
+    context.stroke();
+}
+
+drawSpins();
