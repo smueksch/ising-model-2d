@@ -1,8 +1,9 @@
-use wasm_bindgen::prelude::*;
 use fixedbitset::FixedBitSet;
 use js_sys::Math;
-use std::f64;
+use wasm_bindgen::prelude::*;
 
+mod spin;
+mod spin_grid;
 mod utils;
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
@@ -33,7 +34,7 @@ const SPIN_DOWN_PROBABILITY: f64 = 0.3;
  */
 
 #[wasm_bindgen]
-struct Simulation {
+pub struct Simulation {
     width: u32,
     height: u32,
     coupling: f64,
@@ -43,13 +44,13 @@ struct Simulation {
 
 impl Simulation {
     /// Calculate index from row and column of a spin.
-    pub fn index(&self, row: u32, column: u32) -> usize {
-        (row * self.width + column) as usize
+    pub fn index(&self, row: u32, col: u32) -> Result<usize, &str> {
+        Ok((row * self.width + col) as usize)
     }
 
     /// Get spin at given row and column.
-    pub fn spin(&self, row: u32, column: u32) -> i32 {
-        let index = self.index(row, column);
+    pub fn spin(&self, row: u32, col: u32) -> i32 {
+        let index = self.index(row, col).unwrap();
         let spin_repr = self.spins[index];
 
         to_spin(spin_repr)
@@ -57,7 +58,7 @@ impl Simulation {
 
     /// Flip spin at row and column position.
     pub fn flip_spin(&mut self, row: u32, column: u32) {
-        let index = self.index(row, column);
+        let index = self.index(row, column).unwrap();
         self.spins.toggle(index);
     }
 
@@ -79,10 +80,10 @@ impl Simulation {
         let left_column = (column - 1) % self.width;
         let right_column = (column + 1) % self.width;
 
-        let sum = self.spin(top_row, column) +
-                  self.spin(bottom_row, column) +
-                  self.spin(row, left_column) +
-                  self.spin(row, right_column);
+        let sum = self.spin(top_row, column)
+            + self.spin(bottom_row, column)
+            + self.spin(row, left_column)
+            + self.spin(row, right_column);
 
         sum
     }
@@ -98,7 +99,7 @@ impl Simulation {
     /// Update a single spin at random.
     pub fn update_spin(&mut self) {
         let (row, column) = self.random_position();
-        let index = self.index(row, column);
+        let index = self.index(row, column).unwrap();
 
         let neighbor_sum = self.calc_neighbor_sum(row, column);
         let delta_energy = self.calc_delta_energy(row, column, neighbor_sum);
@@ -112,13 +113,15 @@ impl Simulation {
 #[wasm_bindgen]
 impl Simulation {
     pub fn new(width: u32, height: u32, coupling: f64, magnetic_field: f64) -> Simulation {
+        utils::set_panic_hook();
+
         let size = (width * height) as usize;
         let mut spins = FixedBitSet::with_capacity(size);
 
         for i in 0..spins.len() {
             spins.set(i, Math::random() >= SPIN_DOWN_PROBABILITY);
         }
-        
+
         Simulation {
             width,
             height,
