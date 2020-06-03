@@ -2,9 +2,9 @@ use fixedbitset::FixedBitSet;
 use js_sys::Math;
 use wasm_bindgen::prelude::*;
 
-mod spin;
-mod spin_grid;
-mod utils;
+pub mod spin;
+pub(crate) mod spin_grid;
+pub(crate) mod utils;
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
 // allocator.

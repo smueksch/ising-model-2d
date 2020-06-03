@@ -2,6 +2,7 @@
 //! between various interpretations of spins.
 
 /// Enum representing possible spin states.
+#[derive(Debug,PartialEq,Eq)]
 pub enum Spin {
     Up,
     Down,
