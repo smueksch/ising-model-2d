@@ -2,7 +2,7 @@
 //! between various interpretations of spins.
 
 /// Enum representing possible spin states.
-#[derive(Debug,PartialEq,Eq)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum Spin {
     Up,
     Down,
@@ -26,6 +26,16 @@ impl From<&bool> for Spin {
             Spin::Up
         } else {
             Spin::Down
+        }
+    }
+}
+
+impl From<Spin> for bool {
+    /// Convert enum spin representation to boolean representation.
+    fn from(spin: Spin) -> Self {
+        match spin {
+            Spin::Up => true,
+            Spin::Down => false,
         }
     }
 }

@@ -23,6 +23,16 @@ fn test_spin_from_false_ref() {
 }
 
 #[test]
+fn test_bool_from_spin_up() {
+    assert_eq!(true, bool::from(Spin::Up));
+}
+
+#[test]
+fn test_bool_from_spin_down() {
+    assert_eq!(false, bool::from(Spin::Down));
+}
+
+#[test]
 fn test_f64_from_spin_up() {
     assert_eq!(1.0, f64::from(Spin::Up));
 }

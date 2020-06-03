@@ -1,4 +1,5 @@
 use fixedbitset::FixedBitSet;
+use js_sys::Math;
 use std::ops::Index;
 
 use super::spin::Spin;
@@ -39,9 +40,34 @@ pub struct SpinGrid {
 }
 
 impl SpinGrid {
-    pub fn new(dims: &Dimensions) -> SpinGrid {
+    /// Create a new spin grid with given dimensions and all spins down.
+    pub fn all_down(dims: &Dimensions) -> SpinGrid {
         let num_spins = (dims.width * dims.height) as usize;
-        let spins = FixedBitSet::with_capacity(num_spins);
+        let mut spins = FixedBitSet::with_capacity(num_spins);
+
+        for i in 0..spins.len() {
+            spins.set(i, bool::from(Spin::Down));
+        }
+
+        SpinGrid {
+            dims: dims.clone(),
+            spins,
+        }
+    }
+
+    /// Create a new, randomly initialized spin grid with given dimensions.
+    ///
+    /// Takes the dimensions of the new grid and the probability of a spin
+    /// within the grid to be up and creates a new grid of spins using
+    /// these parameters. Each spin will be randomly assigned up or down
+    /// according to the provided probability.
+    pub fn random(dims: &Dimensions, spin_up_probability: f64) -> SpinGrid {
+        let num_spins = (dims.width * dims.height) as usize;
+        let mut spins = FixedBitSet::with_capacity(num_spins);
+
+        for i in 0..spins.len() {
+            spins.set(i, Math::random() >= spin_up_probability);
+        }
 
         SpinGrid {
             dims: dims.clone(),
